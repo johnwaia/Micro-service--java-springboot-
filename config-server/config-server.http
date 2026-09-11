@@ -1,0 +1,6 @@
+### Verifier que le config-server repond en bonne sante
+GET http://localhost:8888/actuator/health
+
+### Recuperer la configuration effective de product-service (profil par defaut)
+GET http://localhost:8888/product-service/default
+Accept: application/json

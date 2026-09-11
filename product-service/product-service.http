@@ -1,0 +1,55 @@
+### Verifier que product-service repond en bonne sante
+GET http://localhost:8081/actuator/health
+
+### Lister tous les produits
+GET http://localhost:8081/api/products
+Accept: application/json
+
+### Creer un nouveau produit
+# @name createProduct
+POST http://localhost:8081/api/products
+Content-Type: application/json
+
+{
+  "name": "Ecran 27 pouces",
+  "description": "Ecran IPS 27 pouces 144Hz",
+  "price": 249.90,
+  "quantity": 15
+}
+
+### Recuperer le produit qui vient d'etre cree
+GET http://localhost:8081/api/products/{{createProduct.response.body.$.id}}
+Accept: application/json
+
+### Mettre a jour ce produit (baisse de prix et de stock)
+PUT http://localhost:8081/api/products/{{createProduct.response.body.$.id}}
+Content-Type: application/json
+
+{
+  "name": "Ecran 27 pouces",
+  "description": "Ecran IPS 27 pouces 144Hz - promotion",
+  "price": 199.90,
+  "quantity": 10
+}
+
+### Cas invalide : prix negatif et nom vide -> 400 Bad Request
+POST http://localhost:8081/api/products
+Content-Type: application/json
+
+{
+  "name": "",
+  "description": "Produit invalide",
+  "price": -10,
+  "quantity": -5
+}
+
+### Cas 404 : produit inexistant
+GET http://localhost:8081/api/products/999999
+Accept: application/json
+
+### Supprimer le produit cree
+DELETE http://localhost:8081/api/products/{{createProduct.response.body.$.id}}
+
+### Verifier que le produit supprime n'existe plus -> 404
+GET http://localhost:8081/api/products/{{createProduct.response.body.$.id}}
+Accept: application/json

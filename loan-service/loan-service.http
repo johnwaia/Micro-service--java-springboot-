@@ -1,0 +1,35 @@
+### Verifier que loan-service repond en bonne sante
+GET http://localhost:8092/actuator/health
+
+### Lister tous les emprunts
+GET http://localhost:8092/api/loans
+Accept: application/json
+
+### Creer un emprunt (necessite un livre existant cote book-service, ex. id 1 charge par DataLoader)
+# @name createLoan
+POST http://localhost:8092/api/loans
+Content-Type: application/json
+
+{
+  "memberName": "Bob",
+  "bookId": 3
+}
+
+### Recuperer l'emprunt cree
+GET http://localhost:8092/api/loans/{{createLoan.response.body.$.id}}
+Accept: application/json
+
+### Cas 400 : livre inexistant
+POST http://localhost:8092/api/loans
+Content-Type: application/json
+
+{
+  "memberName": "Alice",
+  "bookId": 999999
+}
+
+### Rendre l'emprunt cree
+PATCH http://localhost:8092/api/loans/{{createLoan.response.body.$.id}}/return
+
+### Tentative de rendre le meme emprunt une 2e fois -> 409 Conflict
+PATCH http://localhost:8092/api/loans/{{createLoan.response.body.$.id}}/return

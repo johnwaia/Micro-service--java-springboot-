@@ -1,0 +1,11 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: product-service
+
+# Propriete de demonstration pour verifier que la config est bien recuperee
+product:
+  service:
+    welcome-message: "Bienvenue sur product-service, configuration recuperee depuis le config-server"

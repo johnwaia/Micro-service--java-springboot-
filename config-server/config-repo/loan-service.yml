@@ -1,0 +1,11 @@
+server:
+  port: 8092
+
+spring:
+  application:
+    name: loan-service
+
+# Propriete de demonstration pour verifier que la config est bien recuperee
+loan:
+  service:
+    welcome-message: "Bienvenue sur loan-service, configuration recuperee depuis le config-server"

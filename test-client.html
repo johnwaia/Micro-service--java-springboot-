@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Test API - Microservices</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --panel: #1e293b;
+    --border: #334155;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --accent: #38bdf8;
+    --get: #22c55e;
+    --post: #38bdf8;
+    --put: #f59e0b;
+    --delete: #ef4444;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, Segoe UI, Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 24px;
+  }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  .sub { color: var(--muted); font-size: 13px; margin-bottom: 20px; }
+  .layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 1100px; }
+  @media (max-width: 800px) { .layout { grid-template-columns: 1fr; } }
+  .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+  .panel h2 { font-size: 14px; margin: 0 0 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+  label { display: block; font-size: 12px; color: var(--muted); margin: 10px 0 4px; }
+  input, select, textarea {
+    width: 100%;
+    background: #0b1220;
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-size: 13px;
+    font-family: inherit;
+  }
+  textarea { min-height: 120px; font-family: ui-monospace, Consolas, monospace; resize: vertical; }
+  .row { display: flex; gap: 8px; }
+  .row > * { flex: 1; }
+  .method-badge { font-weight: 700; padding: 2px 8px; border-radius: 4px; font-size: 11px; }
+  .m-GET { background: var(--get); color: #06240f; }
+  .m-POST { background: var(--post); color: #04222f; }
+  .m-PUT { background: var(--put); color: #2b1900; }
+  .m-DELETE { background: var(--delete); color: #2c0605; }
+  button {
+    margin-top: 14px;
+    width: 100%;
+    padding: 10px;
+    background: var(--accent);
+    color: #04222f;
+    border: none;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  button:hover { filter: brightness(1.1); }
+  button:disabled { opacity: .5; cursor: default; }
+  .presets { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .preset {
+    background: #0b1220; border: 1px solid var(--border); color: var(--text);
+    padding: 5px 9px; border-radius: 999px; font-size: 11px; cursor: pointer; margin: 0;
+  }
+  .preset:hover { border-color: var(--accent); }
+  .status-line { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 13px; }
+  .status-pill { padding: 2px 10px; border-radius: 999px; font-weight: 700; font-size: 12px; }
+  .status-ok { background: #14532d; color: #86efac; }
+  .status-err { background: #450a0a; color: #fca5a5; }
+  .status-pending { background: #1e293b; color: var(--muted); }
+  pre {
+    background: #0b1220;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px;
+    font-size: 12px;
+    overflow: auto;
+    max-height: 420px;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .hint { font-size: 11px; color: var(--muted); margin-top: 6px; }
+</style>
+</head>
+<body>
+
+<h1>Testeur API - microservices</h1>
+<div class="sub">Envoie des requêtes directement depuis ce navigateur vers la gateway (ou un service direct).</div>
+
+<div class="layout">
+
+  <div class="panel">
+    <h2>Requête</h2>
+
+    <div class="presets" id="presets"></div>
+
+    <label>Base URL</label>
+    <input id="baseUrl" value="http://localhost:8090">
+
+    <div class="row">
+      <div>
+        <label>Méthode</label>
+        <select id="method">
+          <option>GET</option>
+          <option>POST</option>
+          <option>PUT</option>
+          <option>DELETE</option>
+        </select>
+      </div>
+      <div style="flex:3">
+        <label>Chemin</label>
+        <input id="path" value="/api/products">
+      </div>
+    </div>
+
+    <label>Corps JSON (POST / PUT)</label>
+    <textarea id="body" placeholder='{"name":"Casque audio","description":"Casque sans fil","price":49.90,"quantity":15}'></textarea>
+
+    <button id="send">Envoyer</button>
+    <div class="hint">Astuce : la gateway route /api/products, /api/books, /api/loans. Pour tester product-service directement, mets la base URL sur http://localhost:8081.</div>
+  </div>
+
+  <div class="panel">
+    <h2>Réponse</h2>
+    <div class="status-line">
+      <span id="statusPill" class="status-pill status-pending">-</span>
+      <span id="timing" style="color:var(--muted)"></span>
+    </div>
+    <pre id="output">Aucune requête envoyée.</pre>
+  </div>
+
+</div>
+
+<script>
+const presets = [
+  { label: "GET produits", method: "GET", path: "/api/products", body: "" },
+  { label: "GET produit #1", method: "GET", path: "/api/products/1", body: "" },
+  { label: "POST produit", method: "POST", path: "/api/products", body: '{\n  "name": "Casque audio",\n  "description": "Casque sans fil",\n  "price": 49.90,\n  "quantity": 15\n}' },
+  { label: "PUT produit #1", method: "PUT", path: "/api/products/1", body: '{\n  "name": "Clavier mecanique",\n  "description": "Clavier mecanique retroeclaire",\n  "price": 74.90,\n  "quantity": 20\n}' },
+  { label: "DELETE produit #1", method: "DELETE", path: "/api/products/1", body: "" },
+  { label: "GET livres", method: "GET", path: "/api/books", body: "" },
+  { label: "GET emprunts", method: "GET", path: "/api/loans", body: "" },
+  { label: "Health gateway", method: "GET", path: "/actuator/health", body: "" },
+];
+
+const presetsEl = document.getElementById("presets");
+presets.forEach(p => {
+  const btn = document.createElement("button");
+  btn.className = "preset";
+  btn.textContent = p.label;
+  btn.onclick = () => {
+    document.getElementById("method").value = p.method;
+    document.getElementById("path").value = p.path;
+    document.getElementById("body").value = p.body;
+  };
+  presetsEl.appendChild(btn);
+});
+
+const sendBtn = document.getElementById("send");
+const statusPill = document.getElementById("statusPill");
+const output = document.getElementById("output");
+const timing = document.getElementById("timing");
+
+sendBtn.onclick = async () => {
+  const base = document.getElementById("baseUrl").value.replace(/\/$/, "");
+  const method = document.getElementById("method").value;
+  const path = document.getElementById("path").value;
+  const bodyText = document.getElementById("body").value.trim();
+  const url = base + path;
+
+  const opts = { method, headers: {} };
+  if (method === "POST" || method === "PUT") {
+    opts.headers["Content-Type"] = "application/json";
+    if (bodyText) opts.body = bodyText;
+  }
+
+  sendBtn.disabled = true;
+  statusPill.className = "status-pill status-pending";
+  statusPill.textContent = "...";
+  output.textContent = "Envoi vers " + url + " ...";
+  const start = performance.now();
+
+  try {
+    const res = await fetch(url, opts);
+    const elapsed = Math.round(performance.now() - start);
+    timing.textContent = elapsed + " ms";
+
+    statusPill.textContent = res.status + " " + res.statusText;
+    statusPill.className = "status-pill " + (res.ok ? "status-ok" : "status-err");
+
+    const contentType = res.headers.get("content-type") || "";
+    let displayed;
+    if (contentType.includes("application/json")) {
+      const json = await res.json().catch(() => null);
+      displayed = json !== null ? JSON.stringify(json, null, 2) : "(corps vide)";
+    } else {
+      displayed = await res.text();
+      if (!displayed) displayed = "(corps vide)";
+    }
+    output.textContent = displayed;
+  } catch (err) {
+    const elapsed = Math.round(performance.now() - start);
+    timing.textContent = elapsed + " ms";
+    statusPill.textContent = "Erreur réseau";
+    statusPill.className = "status-pill status-err";
+    output.textContent = "Impossible de contacter " + url + "\n\n" + err.message +
+      "\n\nVérifie que le service est démarré et que CORS est activé sur la gateway.";
+  } finally {
+    sendBtn.disabled = false;
+  }
+};
+</script>
+
+</body>
+</html>

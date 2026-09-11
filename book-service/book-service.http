@@ -1,0 +1,52 @@
+### Verifier que book-service repond en bonne sante
+GET http://localhost:8091/actuator/health
+
+### Lister tous les livres
+GET http://localhost:8091/api/books
+Accept: application/json
+
+### Creer un nouveau livre
+# @name createBook
+POST http://localhost:8091/api/books
+Content-Type: application/json
+
+{
+  "title": "Fahrenheit 451",
+  "author": "Ray Bradbury",
+  "isbn": "9782253004420",
+  "totalCopies": 2
+}
+
+### Recuperer le livre qui vient d'etre cree
+GET http://localhost:8091/api/books/{{createBook.response.body.$.id}}
+Accept: application/json
+
+### Decrementer le stock (simule un emprunt)
+PATCH http://localhost:8091/api/books/{{createBook.response.body.$.id}}/decrement-stock
+
+### Decrementer a nouveau (stock a 0 apres cette requete)
+PATCH http://localhost:8091/api/books/{{createBook.response.body.$.id}}/decrement-stock
+
+### Decrementer une 3e fois -> 409 Conflict (plus aucun exemplaire disponible)
+PATCH http://localhost:8091/api/books/{{createBook.response.body.$.id}}/decrement-stock
+
+### Reincrementer le stock (simule un retour)
+PATCH http://localhost:8091/api/books/{{createBook.response.body.$.id}}/increment-stock
+
+### Cas invalide : titre vide -> 400 Bad Request
+POST http://localhost:8091/api/books
+Content-Type: application/json
+
+{
+  "title": "",
+  "author": "Auteur",
+  "isbn": "0000000000000",
+  "totalCopies": 1
+}
+
+### Cas 404 : livre inexistant
+GET http://localhost:8091/api/books/999999
+Accept: application/json
+
+### Supprimer le livre cree
+DELETE http://localhost:8091/api/books/{{createBook.response.body.$.id}}

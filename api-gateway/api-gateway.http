@@ -1,0 +1,69 @@
+### Verifier que la gateway repond en bonne sante
+GET http://localhost:8090/actuator/health
+
+### Lister les produits a travers la gateway (route vers product-service)
+# Avant que product-service ne soit demarre et enregistre aupres d'Eureka,
+# cette requete repond 503 Service Unavailable (aucune instance disponible).
+# Une fois product-service demarre, elle doit repondre 200.
+GET http://localhost:8090/api/products
+Accept: application/json
+
+### ===================== book-service / loan-service (Module 10) =====================
+
+### Creer un livre a travers la gateway (route vers book-service)
+# @name createBook
+POST http://localhost:8090/api/books
+Content-Type: application/json
+
+{
+  "title": "Le Meilleur des mondes",
+  "author": "Aldous Huxley",
+  "isbn": "9782266296236",
+  "totalCopies": 1
+}
+
+### Verifier le livre cree (1 seul exemplaire disponible)
+GET http://localhost:8090/api/books/{{createBook.response.body.$.id}}
+Accept: application/json
+
+### Creer un emprunt reussi (le seul exemplaire disponible est emprunte)
+# @name createLoan
+POST http://localhost:8090/api/loans
+Content-Type: application/json
+
+{
+  "memberName": "Bob",
+  "bookId": {{createBook.response.body.$.id}}
+}
+
+### Verifier que le stock du livre est bien descendu a 0
+GET http://localhost:8090/api/books/{{createBook.response.body.$.id}}
+Accept: application/json
+
+### Creer un emprunt refuse : stock epuise -> 409 Conflict
+POST http://localhost:8090/api/loans
+Content-Type: application/json
+
+{
+  "memberName": "Alice",
+  "bookId": {{createBook.response.body.$.id}}
+}
+
+### Creer un emprunt refuse : livre inexistant -> 400 Bad Request
+POST http://localhost:8090/api/loans
+Content-Type: application/json
+
+{
+  "memberName": "Alice",
+  "bookId": 999999
+}
+
+### Rendre l'emprunt -> le stock du livre doit remonter a 1
+PATCH http://localhost:8090/api/loans/{{createLoan.response.body.$.id}}/return
+
+### Verifier que le stock est remonte a 1
+GET http://localhost:8090/api/books/{{createBook.response.body.$.id}}
+Accept: application/json
+
+### Tentative de rendre le meme emprunt une 2e fois -> 409 Conflict
+PATCH http://localhost:8090/api/loans/{{createLoan.response.body.$.id}}/return

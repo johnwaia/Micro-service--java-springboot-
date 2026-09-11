@@ -1,0 +1,11 @@
+server:
+  port: 8091
+
+spring:
+  application:
+    name: book-service
+
+# Propriete de demonstration pour verifier que la config est bien recuperee
+book:
+  service:
+    welcome-message: "Bienvenue sur book-service, configuration recuperee depuis le config-server"
