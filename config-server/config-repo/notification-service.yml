@@ -1,0 +1,12 @@
+server:
+  port: 8094
+
+spring:
+  application:
+    name: notification-service
+
+notification:
+  retry:
+    enabled: true
+    rate: PT2M
+    max-attempts: 3

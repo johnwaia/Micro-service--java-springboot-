@@ -1,0 +1,7 @@
+# Profil "demo" (SPRING_PROFILES_ACTIVE=demo) : delais raccourcis pour montrer l'expiration
+# des paiements pendant une demonstration / la collection Postman.
+booking:
+  payment-timeout: PT20S
+  scheduler:
+    expiration-rate: PT15S
+    initial-delay: PT15S

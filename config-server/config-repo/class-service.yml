@@ -1,0 +1,11 @@
+server:
+  port: 8091
+
+spring:
+  application:
+    name: class-service
+
+# Charge 4 cours de demonstration au demarrage (ids 1 a 4)
+fitconnect:
+  demo-data:
+    enabled: true

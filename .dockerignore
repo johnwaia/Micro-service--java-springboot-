@@ -1,0 +1,9 @@
+.git
+.github
+.vscode
+.idea
+postman
+**/src
+**/target/classes
+**/target/test-classes
+**/target/surefire-reports

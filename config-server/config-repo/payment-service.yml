@@ -1,0 +1,11 @@
+server:
+  port: 8093
+
+spring:
+  application:
+    name: payment-service
+
+# Simulation : paiement accepte si montant < 100 EUR, refuse sinon
+payment:
+  simulation:
+    rejection-threshold: 100.00

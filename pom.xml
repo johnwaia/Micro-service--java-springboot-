@@ -14,6 +14,8 @@
 
     <properties>
         <maven.compiler.release>17</maven.compiler.release>
+        <!-- Conserve le nom des parametres (@RequestParam / @PathVariable sans nom explicite) -->
+        <maven.compiler.parameters>true</maven.compiler.parameters>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring-boot.version>3.2.5</spring-boot.version>
         <spring-cloud.version>2023.0.1</spring-cloud.version>
@@ -56,6 +58,10 @@
         <module>product-service</module>
         <module>book-service</module>
         <module>loan-service</module>
+        <module>class-service</module>
+        <module>booking-service</module>
+        <module>payment-service</module>
+        <module>notification-service</module>
         <module>api-gateway</module>
     </modules>
 

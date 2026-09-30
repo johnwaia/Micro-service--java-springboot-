@@ -14,6 +14,7 @@ spring:
               - GET
               - POST
               - PUT
+              - PATCH
               - DELETE
               - OPTIONS
             allowedHeaders: "*"
@@ -34,3 +35,20 @@ spring:
           uri: lb://loan-service
           predicates:
             - Path=/api/loans/**
+        # --- FitConnect ---
+        - id: class-service
+          uri: lb://class-service
+          predicates:
+            - Path=/api/classes/**
+        - id: booking-service
+          uri: lb://booking-service
+          predicates:
+            - Path=/api/bookings/**
+        - id: payment-service
+          uri: lb://payment-service
+          predicates:
+            - Path=/api/payments/**
+        - id: notification-service
+          uri: lb://notification-service
+          predicates:
+            - Path=/api/notifications/**

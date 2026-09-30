@@ -1,0 +1,59 @@
+spring:
+  application:
+    name: booking-service
+  config:
+    import: optional:configserver:${CONFIG_SERVER_URL:http://localhost:8888}
+  datasource:
+    url: jdbc:h2:mem:bookingdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    open-in-view: false
+  h2:
+    console:
+      enabled: true
+  cloud:
+    openfeign:
+      circuitbreaker:
+        # Chaque client Feign est enveloppe dans un circuit breaker Resilience4j (cf. ResilienceConfig)
+        enabled: true
+      client:
+        config:
+          default:
+            connect-timeout: 2000
+            read-timeout: 5000
+
+server:
+  port: 8092
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
+  instance:
+    prefer-ip-address: true
+
+booking:
+  payment-timeout: PT1H        # paymentDeadline = bookingDate + 1h
+  cancellation-notice: PT24H   # cancellationDeadline = classDate - 24h
+  scheduler:
+    enabled: true
+    expiration-rate: PT5M
+    reminder-rate: PT15M
+    initial-delay: PT30S
+  resilience:
+    timeout: PT5S
+    wait-in-open-state: PT10S
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,circuitbreakers
+  health:
+    circuitbreakers:
+      enabled: true

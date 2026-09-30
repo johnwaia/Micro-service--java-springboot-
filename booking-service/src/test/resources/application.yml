@@ -1,0 +1,13 @@
+spring:
+  cloud:
+    config:
+      enabled: false
+
+eureka:
+  client:
+    enabled: false
+
+booking:
+  scheduler:
+    # les tests declenchent BookingScheduler a la main
+    enabled: false

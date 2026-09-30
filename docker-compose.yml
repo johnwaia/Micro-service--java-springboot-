@@ -1,0 +1,119 @@
+# FitConnect - stack complete (infrastructure + 4 microservices)
+#   mvn package -DskipTests
+#   docker compose up --build
+# Gateway : http://localhost:8090  -  Eureka : http://localhost:8761
+# Profil "demo" de booking-service (paiement expire en 20 s) : BOOKING_PROFILE=demo docker compose up
+
+x-java-service: &java-service
+  build:
+    context: .
+  restart: on-failure
+  environment: &common-env
+    EUREKA_URL: http://eureka-server:8761/eureka/
+    CONFIG_SERVER_URL: http://config-server:8888
+    TZ: Europe/Paris
+
+x-healthcheck: &healthcheck
+  interval: 10s
+  timeout: 5s
+  retries: 18
+  start_period: 20s
+
+services:
+  eureka-server:
+    <<: *java-service
+    build:
+      context: .
+      args:
+        MODULE: eureka-server
+    ports:
+      - "8761:8761"
+    healthcheck:
+      <<: *healthcheck
+      test: ["CMD", "curl", "-fs", "http://localhost:8761/actuator/health"]
+
+  config-server:
+    <<: *java-service
+    build:
+      context: .
+      args:
+        MODULE: config-server
+    environment:
+      <<: *common-env
+      CONFIG_REPO_LOCATION: file:/app/config-repo/
+    volumes:
+      - ./config-server/config-repo:/app/config-repo:ro
+    ports:
+      - "8888:8888"
+    healthcheck:
+      <<: *healthcheck
+      test: ["CMD", "curl", "-fs", "http://localhost:8888/actuator/health"]
+
+  class-service:
+    <<: *java-service
+    build:
+      context: .
+      args:
+        MODULE: class-service
+    ports:
+      - "8091:8091"
+    depends_on: &infra
+      eureka-server:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck
+      test: ["CMD", "curl", "-fs", "http://localhost:8091/actuator/health"]
+
+  booking-service:
+    <<: *java-service
+    build:
+      context: .
+      args:
+        MODULE: booking-service
+    environment:
+      <<: *common-env
+      SPRING_PROFILES_ACTIVE: ${BOOKING_PROFILE:-default}
+    ports:
+      - "8092:8092"
+    depends_on: *infra
+    healthcheck:
+      <<: *healthcheck
+      test: ["CMD", "curl", "-fs", "http://localhost:8092/actuator/health"]
+
+  payment-service:
+    <<: *java-service
+    build:
+      context: .
+      args:
+        MODULE: payment-service
+    ports:
+      - "8093:8093"
+    depends_on: *infra
+    healthcheck:
+      <<: *healthcheck
+      test: ["CMD", "curl", "-fs", "http://localhost:8093/actuator/health"]
+
+  notification-service:
+    <<: *java-service
+    build:
+      context: .
+      args:
+        MODULE: notification-service
+    ports:
+      - "8094:8094"
+    depends_on: *infra
+    healthcheck:
+      <<: *healthcheck
+      test: ["CMD", "curl", "-fs", "http://localhost:8094/actuator/health"]
+
+  api-gateway:
+    <<: *java-service
+    build:
+      context: .
+      args:
+        MODULE: api-gateway
+    ports:
+      - "8090:8090"
+    depends_on: *infra

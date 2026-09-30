@@ -1,0 +1,21 @@
+server:
+  port: 8092
+
+spring:
+  application:
+    name: booking-service
+  cloud:
+    openfeign:
+      circuitbreaker:
+        enabled: true
+
+booking:
+  payment-timeout: PT1H        # paymentDeadline = bookingDate + 1h
+  cancellation-notice: PT24H   # annulation gratuite jusqu'a 24h avant le cours
+  scheduler:
+    enabled: true
+    expiration-rate: PT5M      # expiration des paiements en attente
+    reminder-rate: PT15M       # rappels 24h avant le cours
+  resilience:
+    timeout: PT5S
+    wait-in-open-state: PT10S
