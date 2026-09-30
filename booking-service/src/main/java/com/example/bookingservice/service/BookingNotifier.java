@@ -29,7 +29,7 @@ public class BookingNotifier {
 
     public boolean bookingPending(Booking b) {
         return send(b, NotificationType.BOOKING_CONFIRMATION,
-                "FitConnect - Reservation " + b.getBookingReference() + " en attente de paiement",
+                "Projet Microservice - Reservation " + b.getBookingReference() + " en attente de paiement",
                 "Bonjour " + b.getUserName() + ",\n"
                         + "Votre reservation est en attente de paiement. Payez avant " + FORMAT.format(b.getPaymentDeadline()) + ".\n"
                         + "Cours : " + b.getClassName() + " avec " + b.getInstructor() + " le " + FORMAT.format(b.getClassDate()) + "\n"
@@ -38,7 +38,7 @@ public class BookingNotifier {
 
     public boolean paymentConfirmed(Booking b) {
         return send(b, NotificationType.PAYMENT_CONFIRMATION,
-                "FitConnect - Paiement recu, reservation " + b.getBookingReference() + " confirmee",
+                "Projet Microservice - Paiement recu, reservation " + b.getBookingReference() + " confirmee",
                 "Bonjour " + b.getUserName() + ",\n"
                         + "Votre paiement de " + b.getTotalAmount() + " EUR (" + b.getPaymentReference() + ") est confirme.\n"
                         + "Rendez-vous le " + FORMAT.format(b.getClassDate()) + " pour " + b.getClassName() + ".\n"
@@ -47,7 +47,7 @@ public class BookingNotifier {
 
     public boolean bookingCancelled(Booking b, String details) {
         return send(b, NotificationType.BOOKING_CANCELLED,
-                "FitConnect - Reservation " + b.getBookingReference() + " annulee",
+                "Projet Microservice - Reservation " + b.getBookingReference() + " annulee",
                 "Bonjour " + b.getUserName() + ",\n"
                         + "Votre reservation pour " + b.getClassName() + " du " + FORMAT.format(b.getClassDate())
                         + " a ete annulee.\n" + details);
@@ -55,7 +55,7 @@ public class BookingNotifier {
 
     public boolean reminder(Booking b) {
         return send(b, NotificationType.BOOKING_REMINDER,
-                "FitConnect - Rappel : " + b.getClassName() + " demain",
+                "Projet Microservice - Rappel : " + b.getClassName() + " demain",
                 "Bonjour " + b.getUserName() + ",\n"
                         + "Petit rappel : votre cours " + b.getClassName() + " avec " + b.getInstructor()
                         + " a lieu le " + FORMAT.format(b.getClassDate()) + " (" + b.getNumberOfSpots() + " place(s)).");

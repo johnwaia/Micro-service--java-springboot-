@@ -1,4 +1,4 @@
-# FitConnect - stack complete (infrastructure + 4 microservices)
+# Projet Microservice - stack complete (infrastructure + 4 microservices)
 #   mvn package -DskipTests
 #   docker compose up --build
 # Gateway : http://localhost:8090  -  Eureka : http://localhost:8761

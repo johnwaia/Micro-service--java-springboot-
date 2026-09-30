@@ -35,7 +35,7 @@ spring:
           uri: lb://loan-service
           predicates:
             - Path=/api/loans/**
-        # --- FitConnect ---
+        # --- Projet Microservice ---
         - id: class-service
           uri: lb://class-service
           predicates:

@@ -14,7 +14,7 @@
     <packaging>jar</packaging>
 
     <name>class-service</name>
-    <description>FitConnect - gestion des cours de sport</description>
+    <description>Projet Microservice - gestion des cours de sport</description>
 
     <dependencies>
         <dependency>

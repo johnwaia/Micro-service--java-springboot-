@@ -14,7 +14,7 @@
     <packaging>jar</packaging>
 
     <name>notification-service</name>
-    <description>FitConnect - envoi de notifications (email/SMS simules)</description>
+    <description>Projet Microservice - envoi de notifications (email/SMS simules)</description>
 
     <dependencies>
         <dependency>

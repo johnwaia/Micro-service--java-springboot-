@@ -14,7 +14,7 @@
     <packaging>jar</packaging>
 
     <name>booking-service</name>
-    <description>FitConnect - gestion des reservations (orchestrateur du saga)</description>
+    <description>Projet Microservice - gestion des reservations (orchestrateur du saga)</description>
 
     <dependencies>
         <dependency>

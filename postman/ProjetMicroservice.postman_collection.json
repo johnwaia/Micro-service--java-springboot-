@@ -1,6 +1,6 @@
 {
   "info": {
-    "name": "FitConnect - Reservation de cours de sport",
+    "name": "Projet Microservice - Reservation de cours de sport",
     "description": "Collection du TP Efrei M2-DEV2 Microservices (class-service, booking-service, payment-service, notification-service).\n\nToutes les requetes passent par l'api-gateway ({{baseUrl}} = http://localhost:8090).\nExecuter les dossiers dans l'ordre (Collection Runner) : les ids crees sont chaines via les variables de collection.\n\nLe scenario \"Paiement expire\" attend 25 s : il faut lancer booking-service avec le profil demo\n(payment-timeout = 20 s), sinon le delai de paiement est de 1 h et la requete renverra 200.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },

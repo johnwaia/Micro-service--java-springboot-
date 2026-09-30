@@ -1,4 +1,4 @@
-# FitConnect — Réservation et paiement de cours de sport
+# Projet Microservice — Réservation et paiement de cours de sport
 
 TP Efrei M2-DEV2 Microservices. Quatre microservices métier ajoutés au projet
 `mon-projet-microservice`, qui réutilisent l'infrastructure existante (`eureka-server`,
@@ -251,7 +251,7 @@ stateful (`support/Fake*Client`). Ils appliquent les mêmes règles que les vrai
 
 ## Collection Postman
 
-Le fichier [`postman/FitConnect.postman_collection.json`](postman/FitConnect.postman_collection.json)
+Le fichier [`postman/ProjetMicroservice.postman_collection.json`](postman/ProjetMicroservice.postman_collection.json)
 contient 32 requêtes avec leurs assertions, à exécuter dans l'ordre avec le *Collection
 Runner*. Les ids créés sont chaînés par des variables de collection et les dates des cours
 sont calculées par des pre-request scripts.
@@ -263,7 +263,7 @@ sont calculées par des pre-request scripts.
 5. **Scénarios d'erreur** : surréservation (409), paiement expiré (409, **profil `demo`**), annulation à moins de 24 h (409), paiement refusé à 120 € (402), cours invalide (400), réservation inconnue (404)
 6. **Suivi** : réservations expirées, historique des paiements, notifications en attente
 
-Ligne de commande : `npx newman run postman/FitConnect.postman_collection.json`
+Ligne de commande : `npx newman run postman/ProjetMicroservice.postman_collection.json`
 (booking-service lancé avec le profil `demo`).
 
 ## Configuration (`config-server/config-repo`)
