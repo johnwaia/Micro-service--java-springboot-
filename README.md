@@ -17,6 +17,39 @@ TP Efrei M2-DEV2 Microservices. Quatre microservices métier ajoutés au projet
 > ⚠️ Les ports 8091/8092 imposés par le sujet sont ceux qu'utilisaient déjà `book-service` et
 > `loan-service` (module 10). Les deux groupes de services ne peuvent donc pas tourner en même temps.
 
+## Choix techniques
+
+| Domaine | Choix | Justification |
+|---|---|---|
+| Socle | Java 17, Spring Boot 3.2.5, Spring Cloud 2023.0.1, Maven multi-modules | Versions compatibles entre elles. Un seul `pom.xml` racine gère les versions de tous les modules |
+| Découverte de services | Netflix Eureka | Les services s'appellent par leur nom (`lb://class-service`) et non par une adresse fixe |
+| Configuration | Spring Cloud Config (dépôt fichier `config-repo`) | Ports, délais et seuils se modifient sans recompiler. Chaque service garde des valeurs par défaut (`optional:configserver`) et démarre même sans config-server |
+| Point d'entrée | Spring Cloud Gateway | Une seule URL pour le client, avec le routage et le CORS au même endroit |
+| Communication | OpenFeign synchrone, client `feign-hc5` | Les appels REST s'écrivent comme de simples interfaces Java. Le client Apache HttpClient 5 remplace le client par défaut, qui ne gère pas `PATCH` |
+| Résilience | Resilience4j (circuit breaker + `FallbackFactory`) | Une panne d'un service ne se propage pas. Les erreurs métier (4xx) sont transmises sans ouvrir le circuit |
+| Transactions distribuées | Saga orchestré par `booking-service`, avec compensations | Pas de transaction globale entre les bases. Un seul service pilote le parcours, ce qui le rend plus facile à suivre que des échanges d'événements |
+| Concurrence | Verrouillage optimiste JPA (`@Version`), jusqu'à 3 nouvelles tentatives | Empêche de vendre plus de places qu'il n'en existe, sans verrou bloquant sur la base |
+| Données | Une base H2 en mémoire par service | Chaque service possède ses données (*database per service*). H2 évite d'installer une base pour le TP |
+| Traitements différés | `@Scheduled` (Spring) | Expiration des paiements, rappels avant les cours et relances des notifications, sans ajouter d'outil externe |
+| Déploiement | Docker Compose, un seul `Dockerfile` générique (`MODULE` en argument) | Toute la stack démarre en une commande. Les healthchecks Actuator imposent l'ordre de démarrage (Eureka et Config avant les services métier) |
+| Tests | JUnit 5, Mockito, MockMvc, *fakes* stateful, Postman/Newman | Tests unitaires, d'intégration et de bout en bout. Les *fakes* vérifient l'état réel (places, statut du paiement) et pas seulement les appels |
+
+## Travail réalisé
+
+- **4 microservices métier** créés et branchés sur l'infrastructure existante :
+  - `class-service` : CRUD des cours, recherche paginée et filtrable, annulation logique, réservation et libération de places protégées par le verrouillage optimiste.
+  - `booking-service` : cycle de vie complet d'une réservation (`PENDING_PAYMENT` → `CONFIRMED` → `COMPLETED`, ou `CANCELLED`) et orchestration du saga.
+  - `payment-service` : paiement simulé (refus à partir de 100 €), remboursement unique, historique.
+  - `notification-service` : envoi d'email simulé, suivi des statuts et relances automatiques (3 tentatives au maximum).
+- **Saga complet** : réservation, paiement, annulation et remboursement, avec des compensations en cas d'échec (libération des places, reprise des places si le remboursement échoue).
+- **Tolérance aux pannes** : trois clients Feign protégés par un circuit breaker. Une indisponibilité renvoie un 503 propre, et la perte du service de notification ne fait pas échouer une réservation.
+- **Tâches planifiées** : annulation des réservations non payées dans le délai, rappel 24 h avant le cours (envoyé une seule fois), relance des notifications en échec.
+- **Validation et erreurs** : contraintes Bean Validation sur les entrées, format d'erreur uniforme `{timestamp, status, error, message}`, codes HTTP précis (400, 402, 404, 409, 503).
+- **Configuration centralisée** : un fichier par service dans `config-repo`, un profil `demo` aux délais courts, 4 nouvelles routes sur la gateway.
+- **Tests** : tests unitaires et d'intégration pour chaque service, un test de concurrence (25 threads sur 10 places, aucune surréservation) et un test du circuit breaker sur la vraie chaîne Feign.
+- **Collection Postman** : 32 requêtes avec assertions, qui couvrent le parcours nominal et les scénarios d'erreur. Elle peut être lancée avec Newman.
+- **Docker Compose (bonus)** : toute la stack conteneurisée, avec healthchecks et ordre de démarrage.
+
 ## Architecture
 
 ```
